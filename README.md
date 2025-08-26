@@ -3,25 +3,25 @@
 [![Go Version](https://img.shields.io/badge/Go-1.21+-blue.svg)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-一个强大的Go语言库，用于处理IP地址范围、CIDR网络和IP地址合并。基于原始 `github.com/zhanhb/cidr-merger` 项目重构，提供更友好的Go API接口。
+A powerful Go library for handling IP address ranges, CIDR networks, and IP address merging.
 
-## ✨ 功能特性
+## ✨ Features
 
-- 🚀 **IPv4/IPv6 双栈支持** - 完全支持IPv4和IPv6地址格式
-- 🔧 **智能CIDR计算** - 将IP地址范围转换为最优CIDR块
-- 📝 **多格式解析** - 支持单个IP、CIDR、IP范围等多种输入格式
-- 🔄 **范围合并** - 智能合并重叠的IP范围
-- 💻 **纯Go实现** - 无外部依赖，性能优秀
+- 🚀 **IPv4/IPv6 Dual Stack Support** - Full support for IPv4 and IPv6 address formats
+- 🔧 **Smart CIDR Calculation** - Convert IP address ranges to optimal CIDR blocks
+- 📝 **Multi-format Parsing** - Support for single IP, CIDR, IP range and other input formats
+- 🔄 **Range Merging** - Intelligently merge overlapping IP ranges
+- 💻 **Pure Go Implementation** - No external dependencies, excellent performance
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 安装
+### Installation
 
 ```bash
 go get github.com/liliangshan/go-cidr-pkg
 ```
 
-### 基本使用
+### Basic Usage
 
 ```go
 package main
@@ -32,7 +32,7 @@ import (
 )
 
 func main() {
-    // 计算IPv6地址范围的CIDR
+    // Calculate CIDR for IPv6 address range
     startIP := "2001:200:141::"
     endIP := "2001:200:142:ffff:ffff:ffff:ffff:ffff"
     
@@ -47,23 +47,23 @@ func main() {
 }
 ```
 
-## 📚 使用示例
+## 📚 Usage Examples
 
-### IPv6 CIDR 计算
+### IPv6 CIDR Calculation
 
 ```go
 import "github.com/liliangshan/go-cidr-pkg"
 
-// 计算IPv6地址范围
+// Calculate IPv6 address range
 cidrs, err := gocidrpkg.CalculateIPv6CIDRRange(
     "2001:200:141::", 
     "2001:200:142:ffff:ffff:ffff:ffff:ffff"
 )
 
-// 输出: ["2001:200:141::/48", "2001:200:142::/47"]
+// Output: ["2001:200:141::/48", "2001:200:142::/47"]
 ```
 
-### 使用Range对象
+### Using Range Object
 
 ```go
 import (
@@ -77,56 +77,56 @@ end := net.ParseIP("192.168.1.255")
 ipRange := gocidrpkg.NewRange(start, end)
 cidrNets := ipRange.ToIpNets()
 
-// 输出: [192.168.1.0/24]
+// Output: [192.168.1.0/24]
 ```
 
-## 🏗️ 项目结构
+## 🏗️ Project Structure
 
 ```
 go-cidr-pkg/
-├── go-cidr-pkg.go        # 核心库文件
-├── example/               # 使用示例
-│   └── main.go           # 示例代码
-├── README.md              # 项目文档
-├── LICENSE                # MIT许可证
-├── go.mod                 # Go模块配置
-└── .gitignore             # Git忽略文件
+├── go-cidr-pkg.go        # Core library file
+├── example/               # Usage examples
+│   └── main.go           # Example code
+├── README.md              # Project documentation
+├── LICENSE                # MIT License
+├── go.mod                 # Go module configuration
+└── .gitignore             # Git ignore file
 ```
 
-## 🔧 API 参考
+## 🔧 API Reference
 
-### 主要函数
+### Main Functions
 
-| 函数 | 描述 |
-|------|------|
-| `NewRange(start, end net.IP) *Range` | 创建新的IP范围 |
-| `ParseIPRange(s string) (IRange, error)` | 解析IP范围字符串 |
-| `MergeRanges(ranges []IRange) []IRange` | 合并多个IP范围 |
-| `CalculateIPv6CIDRRange(startIP, endIP string) ([]string, error)` | 计算IPv6 CIDR范围 |
+| Function | Description |
+|----------|-------------|
+| `NewRange(start, end net.IP) *Range` | Create new IP range |
+| `ParseIPRange(s string) (IRange, error)` | Parse IP range string |
+| `MergeRanges(ranges []IRange) []IRange` | Merge multiple IP ranges |
+| `CalculateIPv6CIDRRange(startIP, endIP string) ([]string, error)` | Calculate IPv6 CIDR range |
 
-### 类型
+### Types
 
-- `IRange` - IP范围接口
-- `Range` - IP地址范围结构
-- `IpWrapper` - 单个IP包装器
-- `IpNetWrapper` - IP网络包装器
+- `IRange` - IP range interface
+- `Range` - IP address range structure
+- `IpWrapper` - Single IP wrapper
+- `IpNetWrapper` - IP network wrapper
 
-## 🧪 测试
+## 🧪 Testing
 
-运行示例：
+Run examples:
 
 ```bash
 go run example/main.go
 ```
 
-## 📄 许可证
+## 📄 License
 
-本项目基于 MIT 许可证开源。详见 [LICENSE](LICENSE) 文件。
+This project is open source under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## 🤝 贡献
+## 🤝 Contributing
 
-欢迎提交 Issue 和 Pull Request！
+Welcome to submit Issues and Pull Requests!
 
 ---
 
-如果这个项目对您有帮助，请给我们一个 ⭐ Star！
+If this project helps you, please give us a ⭐ Star!

@@ -8,31 +8,31 @@ import (
 	"sort"
 )
 
-// IRange 接口定义了IP范围的基本操作
+// IRange interface defines basic operations for IP ranges
 type IRange interface {
-	ToIp() net.IP           // 如果可以表示为单个IP则返回，否则返回nil
-	ToIpNets() []*net.IPNet // 转换为IP网络列表
-	ToRange() *Range        // 转换为范围
-	String() string         // 字符串表示
+	ToIp() net.IP           // Returns IP if it can be represented as a single IP, otherwise returns nil
+	ToIpNets() []*net.IPNet // Converts to IP network list
+	ToRange() *Range        // Converts to range
+	String() string         // String representation
 }
 
-// Range 表示IP地址范围
+// Range represents an IP address range
 type Range struct {
 	start net.IP
 	end   net.IP
 }
 
-// NewRange 创建新的IP范围
+// NewRange creates a new IP range
 func NewRange(start, end net.IP) *Range {
 	return &Range{start: start, end: end}
 }
 
-// familyLength 返回IP地址族的长度
+// familyLength returns the length of the IP address family
 func (r *Range) familyLength() int {
 	return len(r.start)
 }
 
-// ToIp 如果范围是单个IP则返回，否则返回nil
+// ToIp returns the IP if the range is a single IP, otherwise returns nil
 func (r *Range) ToIp() net.IP {
 	if bytes.Equal(r.start, r.end) {
 		return r.start
@@ -40,7 +40,7 @@ func (r *Range) ToIp() net.IP {
 	return nil
 }
 
-// ToIpNets 将IP范围转换为CIDR网络列表
+// ToIpNets converts IP range to CIDR network list
 func (r *Range) ToIpNets() []*net.IPNet {
 	s, end := r.start, r.end
 	ipBits := len(s) * 8
@@ -51,7 +51,7 @@ func (r *Range) ToIpNets() []*net.IPNet {
 			break
 		}
 
-		// 计算最大前缀长度
+		// Calculate maximum prefix length
 		cidr := max(prefixLength(xor(addOne(end), s)), ipBits-trailingZeros(s))
 		ipNet := &net.IPNet{IP: s, Mask: net.CIDRMask(cidr, ipBits)}
 		result = append(result, ipNet)
@@ -65,27 +65,27 @@ func (r *Range) ToIpNets() []*net.IPNet {
 	return result
 }
 
-// ToRange 返回自身
+// ToRange returns itself
 func (r *Range) ToRange() *Range {
 	return r
 }
 
-// String 返回范围的字符串表示
+// String returns the string representation of the range
 func (r *Range) String() string {
 	return ipToString(r.start) + "-" + ipToString(r.end)
 }
 
-// IpWrapper 包装单个IP地址
+// IpWrapper wraps a single IP address
 type IpWrapper struct {
 	net.IP
 }
 
-// ToIp 返回包装的IP
+// ToIp returns the wrapped IP
 func (r IpWrapper) ToIp() net.IP {
 	return r.IP
 }
 
-// ToIpNets 将单个IP转换为CIDR网络
+// ToIpNets converts a single IP to CIDR network
 func (r IpWrapper) ToIpNets() []*net.IPNet {
 	ipBits := len(r.IP) * 8
 	return []*net.IPNet{
@@ -93,22 +93,22 @@ func (r IpWrapper) ToIpNets() []*net.IPNet {
 	}
 }
 
-// ToRange 将单个IP转换为范围
+// ToRange converts a single IP to range
 func (r IpWrapper) ToRange() *Range {
 	return &Range{start: r.IP, end: r.IP}
 }
 
-// String 返回IP的字符串表示
+// String returns the string representation of the IP
 func (r IpWrapper) String() string {
 	return ipToString(r.IP)
 }
 
-// IpNetWrapper 包装IP网络
+// IpNetWrapper wraps IP network
 type IpNetWrapper struct {
 	*net.IPNet
 }
 
-// ToIp 如果网络掩码全为1则返回IP，否则返回nil
+// ToIp returns IP if network mask is all 1s, otherwise returns nil
 func (r IpNetWrapper) ToIp() net.IP {
 	if allFF(r.IPNet.Mask) {
 		return r.IPNet.IP
@@ -116,23 +116,23 @@ func (r IpNetWrapper) ToIp() net.IP {
 	return nil
 }
 
-// ToIpNets 返回包装的网络
+// ToIpNets returns the wrapped network
 func (r IpNetWrapper) ToIpNets() []*net.IPNet {
 	return []*net.IPNet{r.IPNet}
 }
 
-// ToRange 将网络转换为范围
+// ToRange converts network to range
 func (r IpNetWrapper) ToRange() *Range {
 	ipNet := r.IPNet
 	return &Range{start: ipNet.IP, end: lastIp(ipNet)}
 }
 
-// String 返回网络的字符串表示
+// String returns the string representation of the network
 func (r IpNetWrapper) String() string {
 	return r.IPNet.String()
 }
 
-// 辅助函数
+// Helper functions
 func ipToString(ip net.IP) string {
 	if len(ip) == net.IPv6len {
 		if ipv4 := ip.To4(); len(ipv4) == net.IPv4len {
@@ -212,19 +212,19 @@ func max(a, b int) int {
 	return b
 }
 
-// ParseIPRange 解析IP范围字符串
+// ParseIPRange parses IP range string
 func ParseIPRange(s string) (IRange, error) {
-	// 尝试解析为单个IP
+	// Try to parse as single IP
 	if ip := net.ParseIP(s); ip != nil {
 		return IpWrapper{ip}, nil
 	}
 
-	// 尝试解析为CIDR
+	// Try to parse as CIDR
 	if _, ipNet, err := net.ParseCIDR(s); err == nil {
 		return IpNetWrapper{ipNet}, nil
 	}
 
-	// 尝试解析为IP范围 (start-end)
+	// Try to parse as IP range (start-end)
 	if idx := bytes.IndexByte([]byte(s), '-'); idx > 0 {
 		start := net.ParseIP(s[:idx])
 		end := net.ParseIP(s[idx+1:])
@@ -233,16 +233,16 @@ func ParseIPRange(s string) (IRange, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("无法解析IP范围: %s", s)
+	return nil, fmt.Errorf("unable to parse IP range: %s", s)
 }
 
-// MergeRanges 合并多个IP范围
+// MergeRanges merges multiple IP ranges
 func MergeRanges(ranges []IRange) []IRange {
 	if len(ranges) == 0 {
 		return ranges
 	}
 
-	// 转换为范围并排序
+	// Convert to ranges and sort
 	var rangeList []*Range
 	for _, r := range ranges {
 		rangeList = append(rangeList, r.ToRange())
@@ -252,21 +252,21 @@ func MergeRanges(ranges []IRange) []IRange {
 		return bytes.Compare(rangeList[i].start, rangeList[j].start) < 0
 	})
 
-	// 合并重叠的范围
+	// Merge overlapping ranges
 	var result []IRange
 	current := rangeList[0]
 
 	for i := 1; i < len(rangeList); i++ {
 		next := rangeList[i]
 
-		// 检查是否重叠或相邻
+		// Check if overlapping or adjacent
 		if bytes.Compare(addOne(current.end), next.start) >= 0 {
-			// 合并范围
+			// Merge ranges
 			if bytes.Compare(current.end, next.end) < 0 {
 				current.end = next.end
 			}
 		} else {
-			// 添加当前范围并移动到下一个
+			// Add current range and move to next
 			result = append(result, current)
 			current = next
 		}
@@ -276,13 +276,13 @@ func MergeRanges(ranges []IRange) []IRange {
 	return result
 }
 
-// CalculateIPv6CIDRRange 计算两个IPv6地址之间的CIDR范围
+// CalculateIPv6CIDRRange calculates CIDR range between two IPv6 addresses
 func CalculateIPv6CIDRRange(startIP, endIP string) ([]string, error) {
 	start := net.ParseIP(startIP)
 	end := net.ParseIP(endIP)
 
 	if start == nil || end == nil {
-		return nil, fmt.Errorf("无效的IP地址")
+		return nil, fmt.Errorf("invalid IP address")
 	}
 
 	ipRange := NewRange(start, end)
