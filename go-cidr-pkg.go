@@ -1,4 +1,4 @@
-package main
+package gocidrpkg
 
 import (
 	"bytes"
